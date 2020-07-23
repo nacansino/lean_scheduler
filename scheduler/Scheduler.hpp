@@ -29,12 +29,44 @@
 
 #pragma once
 
+#include <stdint.h>
+
 /**
  * Class Declaration
  */
 
 class Scheduler
 {
-    Scheduler(){};
-    
+public:
+
+    class Task
+    {
+        public:
+            Task(){}
+
+            Task(void (*func)(), uint32_t interval) : 
+                func(func), 
+                interval(interval) 
+            {
+
+            }
+            
+            void (*func)();
+            uint32_t interval;
+    };
+
+    Scheduler(/* args */);
+    ~Scheduler();
+
+private:
+    /* data */
+
 };
+
+Scheduler::Scheduler(/* args */)
+{
+}
+
+Scheduler::~Scheduler()
+{
+}

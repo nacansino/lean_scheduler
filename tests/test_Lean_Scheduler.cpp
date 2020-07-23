@@ -30,14 +30,48 @@
 #include "CppUTest/TestHarness.h"
 #include "Scheduler.hpp"
 
+/**
+ * Prototypes of Mock tasks
+ */
+void task1();
+void task2();
+void task3();
+void task4();
+
+/**
+ * @brief Test group for Lean_Scheduler
+ * 
+ */
 TEST_GROUP(Lean_Scheduler_TestGroup)
 {
+    /* Instance Declaration */
+    Scheduler myScheduler;
+
     void setup()
     {
 
     }
 };
 
+/**
+ * @brief Test to drive I/F development
+ * 
+ */
 TEST(Lean_Scheduler_TestGroup, Init){
-    FAIL("Hi");
+
+    /* Build sample task table */
+    Scheduler::Task taskTable[] = {
+        {task1, 1},     /*!< 1: Run synchronous with systick */
+        {task2, 0},     /*!< 0: continuous task */
+        {task3, 5},     /*!< 5: Run every 5 sys ticks */
+        {task4, 100}    /*!< 100: Run every 100 ticks */
+    };
+
 }
+
+/* Demo tasks for initialization */
+
+void task1(){}
+void task2(){}
+void task3(){}
+void task4(){}
