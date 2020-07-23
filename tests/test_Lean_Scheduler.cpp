@@ -227,7 +227,7 @@ TEST(Lean_Scheduler_TestGroup, run_OncePerSysTick)
                     SYSTICK_INTERVAL_10mS
                     );
     
-    /* Test 1: Call run once, expect one call */
+    /* Test 1: Call run once after initialization, expect one call */
     mock().expectOneCall("task1");
     myScheduler.run();
     mock().checkExpectations();
@@ -270,6 +270,285 @@ TEST(Lean_Scheduler_TestGroup, run_OncePerSysTick)
     mock().clear();
     
 }
+
+/**
+ * @brief   Test that a task registered for two systick
+ *          actually runs for every two systicks
+ * 
+ */
+TEST(Lean_Scheduler_TestGroup, run_TwicePerSysTick)
+{
+    /* Build sample task table */
+    Scheduler::Task taskTable_runTwicePerSysTick[TEST_NUM_TASKS_1] = {
+        {task1, 2},     /*!< 2: twice per systick */
+    };
+    
+    /* Reinitialize object for this specific test */
+    myScheduler.init(taskTable_runTwicePerSysTick, 
+                    TEST_NUM_TASKS_1, 
+                    SYSTICK_INTERVAL_10mS
+                    );
+    
+    /* Test 1: Run once after initialization, expect one call */
+    mock().expectOneCall("task1");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 2: Run again without ticking */
+    mock().expectNoCall("task1");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 3: Run again after 1 tick only */
+    mock().expectNoCall("task1");
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 4: Run again after additional 1 tick 
+               Task should be called now
+    */
+    mock().expectOneCall("task1");
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 5: Run again.  
+               Task should not be called
+    */
+    mock().expectNoCall("task1");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 5: Run again after two ticks.
+               Task should be called
+    */
+    mock().expectOneCall("task1");
+    (void)myScheduler.tick();
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 6: Run after elapsing > 2 ticks.
+     *         Task should only be called once
+     *         even when run() is called repeatedly.
+    */
+    const int arbitrary_value = 7;
+
+    mock().expectOneCall("task1");
+    for( int i=0; i < arbitrary_value; ++i )
+    {
+        /* simulate 7 ticks */
+        (void)myScheduler.tick();
+    }
+    myScheduler.run();
+    myScheduler.run();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+}
+
+/**
+ * @brief   Test with two tasks on the scheduler tray
+ *          Continuous task + Once per systick task
+ * 
+ */
+TEST(Lean_Scheduler_TestGroup, run_TwoTasks_ContinuousAndSingle)
+{
+    /* Build sample task table */
+    Scheduler::Task taskTable_runTwicePerSysTick[TEST_NUM_TASKS_2] = {
+        {task1, 0},     /*!< 0: continuous */
+        {task2, 1}      /*!< 1: once per systick */
+    };
+    
+    /* Reinitialize object for this specific test */
+    myScheduler.init(taskTable_runTwicePerSysTick, 
+                    TEST_NUM_TASKS_2, 
+                    SYSTICK_INTERVAL_10mS
+                    );
+    
+    /* Test 1: Run once after initialization, expect one call for each task */
+    mock().expectOneCall("task1");
+    mock().expectOneCall("task2");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 2: No tick */
+    mock().expectOneCall("task1");
+    mock().expectNoCall("task2");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 3: After one tick */
+    mock().expectOneCall("task1");
+    mock().expectOneCall("task2");
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 4: No tick again */
+    mock().expectOneCall("task1");
+    mock().expectNoCall("task2");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 5: Performance after Arbitrary ticks */
+    const int arbitrary_value = 7;
+
+    mock().expectNCalls(3, "task1");
+    mock().expectOneCall("task2");
+    for( int i=0; i < arbitrary_value; ++i )
+    {
+        /* simulate 7 ticks */
+        (void)myScheduler.tick();
+    }
+    myScheduler.run();
+    myScheduler.run();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+}
+
+/**
+ * @brief   Test with three tasks on the scheduler tray
+ *          one (1) Continuous task +
+ *          one (1) Once per systick task + 
+ *          one (1) once per two systicks
+ * 
+ */
+TEST(Lean_Scheduler_TestGroup, run_ThreeTasks_012)
+{
+    /* Build sample task table */
+    Scheduler::Task taskTable_runTwicePerSysTick[TEST_NUM_TASKS_3] = {
+        {task1, 0},     /*!< 0: continuous */
+        {task2, 1},     /*!< 1: once per systick */
+        {task3, 2}      /*!< 1: once per two systicks */
+    };
+    
+    /* Reinitialize object for this specific test */
+    myScheduler.init(taskTable_runTwicePerSysTick, 
+                    TEST_NUM_TASKS_3, 
+                    SYSTICK_INTERVAL_10mS
+                    );
+    
+    /* Test 1: Run once after initialization, expect one call for each task */
+    mock().expectOneCall("task1");
+    mock().expectOneCall("task2");
+    mock().expectOneCall("task3");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 2: No tick */
+    mock().expectOneCall("task1");
+    mock().expectNoCall("task2");
+    mock().expectNoCall("task3");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 3: tick=1 since start */
+    mock().expectOneCall("task1");
+    mock().expectOneCall("task2");
+    mock().expectNoCall("task3");
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 4: tick=2 since start */
+    mock().expectOneCall("task1");
+    mock().expectOneCall("task2");
+    mock().expectOneCall("task3");
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 5: tick=2 again */
+    mock().expectOneCall("task1");
+    mock().expectNoCall("task2");
+    mock().expectNoCall("task3");
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+    /* Test 6: tick=3 since start */
+    mock().expectOneCall("task1");
+    mock().expectOneCall("task2");
+    mock().expectNoCall("task3");
+    (void)myScheduler.tick();
+    myScheduler.run();
+    mock().checkExpectations();
+    mock().clear();
+
+}
+
+/**
+ * @brief Test three tasks with different intervals
+ * 
+ */
+TEST(Lean_Scheduler_TestGroup, run_ThreeTasks_DifferentIntervals)
+{
+    /* Build sample task table */
+    Scheduler::Task taskTable_runTwicePerSysTick[TEST_NUM_TASKS_3] = {
+        {task1, 1},     /*!< 1: once per systick */
+        {task2, 5},     /*!< 1: once per five systicks */
+        {task3, 7}      /*!< 1: once per seven systicks */
+    };
+    
+    /* Reinitialize object for this specific test */
+    myScheduler.init(taskTable_runTwicePerSysTick, 
+                    TEST_NUM_TASKS_3, 
+                    SYSTICK_INTERVAL_10mS
+                    );
+    
+    /* create an artificial main loop that runs with the systick */
+    for( uint32_t ctr=0; ctr < 100; ++ctr ){
+
+        mock().expectOneCall("task1");  /* Expect one call every loop */
+        
+        /* Expect a call on task2 for every multiples of 5 */
+        if( 0 == ctr % 5 )
+        {
+            mock().expectOneCall("task2");
+        }
+        else
+        {
+            mock().expectNoCall("task2");
+        }
+
+        /* Expect a call on task3 for every multiples of 7 */
+        if( 0 == ctr % 7 )
+        {
+            mock().expectOneCall("task3");
+        }
+        else
+        {
+            mock().expectNoCall("task3");
+        }
+        
+        myScheduler.run();
+        mock().checkExpectations();
+        mock().clear();
+    
+        myScheduler.tick();
+    }
+
+}
+
 /* 
  * Mock Task definitions for Testing
  */

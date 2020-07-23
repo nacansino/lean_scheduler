@@ -75,7 +75,6 @@ bool Scheduler::init(Task* const taskTable, const uint16_t num_tasks, const uint
     /* Attaches the taskTable and num_tasks to internal variables */
     task_table_ = taskTable;
     num_tasks_ = num_tasks;
-
     
     /*  Initializes the last_called_ to 
     *   (UINT32_MAX - interval + 1) so that function is called
