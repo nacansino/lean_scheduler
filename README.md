@@ -8,7 +8,8 @@ A lean, lightweight, and portable scheduler designed for embedded C++ applicatio
 2. Extremely portable for any embedded C++ applications.
 3. Uses cooperative task scheduling.
 4. **No external dependency**. Only uses `stdint.h` for standard types.
-5. Included automated host build through CMake, and test suite via CppUTest
+5. **No dynamic memory** allocation.
+6. Included automated host build through CMake, and test suite via CppUTest
 
 ## Requirements
 
