@@ -30,10 +30,15 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 /* Make sure UINT32_MAX is present*/
 #ifndef UINT32_MAX
     #define UINT32_MAX  (0xFFFFFFFF)
+#endif
+
+#ifndef NULL
+    #define NULL (0)
 #endif
 
 /**
