@@ -26,3 +26,69 @@
  * SOFTWARE.
  * 
  */
+
+#include "Scheduler.hpp"
+
+/**
+ * @brief Class constructor
+ * 
+ */
+Scheduler::Scheduler(/* args */)
+{
+}
+
+/**
+ * @brief Destroy the Scheduler:: Scheduler object
+ * 
+ */
+Scheduler::~Scheduler()
+{
+}
+
+/**
+ * Function implementations
+ */
+
+/**
+ * @brief   Initializes the scheduler object.
+ *          This function binds the array of tasks [taskTable] 
+ *          to be executed by the scheduler.
+ *          This also gives the object information on how long a systick is.
+ * 
+ * @param taskTable 
+ * @param num_tasks 
+ */
+void Scheduler::init(Task* const taskTable, const uint16_t num_tasks, const uint32_t systick_interval)
+{
+    /* Initialize system tick counter to zero */
+    sys_tick_ctr_ = 0;
+}
+
+/**
+ * @brief Increments the system tick 
+ * 
+ * @return uint32_t 
+ */
+uint32_t Scheduler::tick(void)
+{
+    return ++sys_tick_ctr_;
+}
+
+/**
+ * @brief Get the system tick counter value
+ * 
+ * @return uint32_t System Tick Counter Value
+ */
+uint32_t Scheduler::getTickCount(void)
+{
+    return sys_tick_ctr_;
+}
+
+/**
+ * @brief Runs the tasks registered via init().
+ * 
+ */
+void Scheduler::run(void)
+{
+
+}

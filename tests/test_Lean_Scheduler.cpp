@@ -28,6 +28,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
+#include "CppUTestExt/MockSupport.h"
 #include "Scheduler.hpp"
 
 /**
@@ -38,18 +39,32 @@ void task2();
 void task3();
 void task4();
 
+#define TEST_NUM_TASKS (4)
+
 /**
  * @brief Test group for Lean_Scheduler
  * 
  */
 TEST_GROUP(Lean_Scheduler_TestGroup)
 {
+    const uint32_t systick_interval_us = 10000; /* duration of a systick, in us */
+    uint32_t ctr_ret;
+
+    /* Build sample task table */
+    Scheduler::Task taskTable[TEST_NUM_TASKS] = {
+        {task1, 1},     /*!< 1: Run synchronous with systick */
+        {task2, 0},     /*!< 0: continuous task */
+        {task3, 5},     /*!< 5: Run every 5 sys ticks */
+        {task4, 100}    /*!< 100: Run every 100 ticks */
+    };
+
     /* Instance Declaration */
     Scheduler myScheduler;
-
+    
     void setup()
     {
-
+        /* Initialize scheduler */
+        myScheduler.init(taskTable, TEST_NUM_TASKS, systick_interval_us);
     }
 };
 
@@ -59,19 +74,53 @@ TEST_GROUP(Lean_Scheduler_TestGroup)
  */
 TEST(Lean_Scheduler_TestGroup, Init){
 
-    /* Build sample task table */
-    Scheduler::Task taskTable[] = {
-        {task1, 1},     /*!< 1: Run synchronous with systick */
-        {task2, 0},     /*!< 0: continuous task */
-        {task3, 5},     /*!< 5: Run every 5 sys ticks */
-        {task4, 100}    /*!< 100: Run every 100 ticks */
-    };
+    /* Test call on tick() */
+    ctr_ret = myScheduler.tick();
+
+    /* Call scheduler.run() */
+    myScheduler.run();
 
 }
 
-/* Demo tasks for initialization */
+/**
+ * @brief Tests the systick counter increment
+ * 
+ */
+TEST(Lean_Scheduler_TestGroup, tick_Increment){
 
-void task1(){}
-void task2(){}
-void task3(){}
-void task4(){}
+    /* Must be zero after initialization */
+    CHECK_EQUAL(0, myScheduler.getTickCount());
+
+    /* First Call - tick and read */
+    CHECK_EQUAL(1, myScheduler.tick());
+
+    /* Second Call - tick and read */
+    CHECK_EQUAL(2, myScheduler.tick());
+
+    /* Test if it can exceed counting 2^16 */
+    for(uint32_t i = 0; i < 65536; ++i){
+        (void)myScheduler.tick();
+    }
+    /* Expect 2(previous value) + 65536(loop) + 1 (this call) */
+    CHECK_EQUAL(2 + 65536 + 1, myScheduler.tick());
+
+}
+
+/* 
+ * Mock Task definitions for Testing
+ */
+void task1(){
+
+}
+
+void task2(){
+
+}
+
+void task3(){
+
+}
+
+void task4(){
+
+}

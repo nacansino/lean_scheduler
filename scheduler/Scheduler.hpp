@@ -32,18 +32,21 @@
 #include <stdint.h>
 
 /**
- * Class Declaration
+ * Scheduler Class Declaration
  */
-
 class Scheduler
 {
 public:
 
+    /**
+     * Task class
+     * This represents each tasks handled by the scheduler
+     */
     class Task
     {
         public:
+            /* Constructor */
             Task(){}
-
             Task(void (*func)(), uint32_t interval) : 
                 func(func), 
                 interval(interval) 
@@ -55,18 +58,19 @@ public:
             uint32_t interval;
     };
 
+    /* Constructor */
     Scheduler(/* args */);
     ~Scheduler();
+    
+    /**
+     * APIs
+     */
+    void init(Task* const taskTable, const uint16_t num_tasks, const uint32_t systick_interval);
+    void run(void);
+    uint32_t tick(void);
+    uint32_t getTickCount(void);
 
 private:
-    /* data */
+    uint32_t sys_tick_ctr_; /*!< System tick counter */
 
 };
-
-Scheduler::Scheduler(/* args */)
-{
-}
-
-Scheduler::~Scheduler()
-{
-}
