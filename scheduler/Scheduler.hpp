@@ -31,6 +31,11 @@
 
 #include <stdint.h>
 
+/* Make sure UINT32_MAX is present*/
+#ifndef UINT32_MAX
+    #define UINT32_MAX  (0xFFFFFFFF)
+#endif
+
 /**
  * Scheduler Class Declaration
  */
@@ -45,17 +50,24 @@ public:
     class Task
     {
         public:
+            friend class Scheduler; /* Give Scheduler access to internal variables */
+            
             /* Constructor */
             Task(){}
-            Task(void (*func)(), uint32_t interval) : 
+            Task(void (*func)(), volatile uint32_t interval) : 
                 func(func), 
                 interval(interval) 
             {
-
             }
             
+            
+            /* Public members */
             void (*func)();
-            uint32_t interval;
+            volatile uint32_t interval;
+        
+        private:
+            /* Internal variables */
+            uint32_t last_called_ = 0;
     };
 
     /* Constructor */
@@ -65,12 +77,15 @@ public:
     /**
      * APIs
      */
-    void init(Task* const taskTable, const uint16_t num_tasks, const uint32_t systick_interval);
+    bool init(Task* const taskTable, const uint16_t num_tasks, const uint32_t systick_interval);
     void run(void);
     uint32_t tick(void);
     uint32_t getTickCount(void);
 
 private:
-    uint32_t sys_tick_ctr_; /*!< System tick counter */
+    /* Internal variables */
+    volatile uint32_t sys_tick_ctr_ = 0;    /*!< System tick counter */
+    uint16_t num_tasks_ = 0;                /*!< Number of tasks in the task table */
+    Task* task_table_ = NULL;               /*!< Pointer to the task table */
 
 };
