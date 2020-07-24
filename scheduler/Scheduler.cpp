@@ -118,9 +118,14 @@ uint32_t Scheduler::getTickCount(void)
  */
 void Scheduler::run(void)
 {
+    uint32_t sysctr;
+
     /* Loop across the tasks */
     for( uint16_t i = 0; i < num_tasks_; ++i )
     {   
+        /* obtain a copy of the sys_tick_ctr at the execution to avoid concurrency */
+        sysctr = sys_tick_ctr_;
+
         /* Breaks the loop on NULL existence */
         if( task_table_[i].func == NULL ) 
             break;
@@ -131,13 +136,16 @@ void Scheduler::run(void)
             /* Run continuous tasks */
             (*(task_table_[i].func))();
         }
-        else if ( sys_tick_ctr_ - task_table_[i].last_called_ >= task_table_[i].interval )
+        else if ( sysctr - task_table_[i].last_called_ >= task_table_[i].interval )
         {
             /* Run the tasks that are already due */
             (*(task_table_[i].func))();
 
-            /* Update last_called_ */
-            task_table_[i].last_called_ = sys_tick_ctr_;
+            /* Update last_called_. 
+             * using sysctr instead of sys_tick_ctr makes sure that 
+             * the counter value is the same at the start and end of the function
+             */
+            task_table_[i].last_called_ = sysctr;
         }
         else
         {
