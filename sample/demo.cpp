@@ -28,6 +28,10 @@
  */
 
 
-int main(void){
+void setup(void){
+    /**Empty here*/
+}
+
+void loop(void){
     /**Empty here*/
 }
