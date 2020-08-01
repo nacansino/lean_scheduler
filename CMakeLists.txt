@@ -23,13 +23,13 @@ include_directories(..)
 add_subdirectory(scheduler)
 
 #build the demo application
-add_executable(${APP_NAME} sample/demo.cpp)
+#add_executable(${APP_NAME} sample/demo.cpp)
 
 #link the LEAN_SCHEDULER library
-target_link_libraries(
-    ${APP_NAME} 
-    PUBLIC LEAN_SCHEDULER
-)
+# target_link_libraries(
+#     ${APP_NAME} 
+#     PUBLIC LEAN_SCHEDULER
+# )
 
 # Pull CppUTest suite
 #==============================================================
